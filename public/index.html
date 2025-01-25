@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Community Forum</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="styles/mainpage.css" rel="stylesheet" />
+    <link href="styles/navbar.css" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <ul class="nav-list">
+        <li><a href="/protected/dashboard" id="dashboardBtn">Dashboard</a></li>
+        <li><a href="/protected/profile" id="profileBtn">Profile</a></li>
+        <li><a href="/index.html" id="homepageBtn">Homepage</a></li>
+      </ul>
+      <button onclick="logout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </nav>
+    <div class="header">
+      <h1>Welcome to ChatWave!</h1>
+      <img
+        class="logo"
+        src="images/DALL_E_2025-01-22_12.41.23_-_A_clean_and_professional_logo_design_for__ChatWave___a_forum_brand._The_logo_features_a_wave_seamlessly_integrated_with_a_speech_bubble__symbolizing_c-removebg-preview.png"
+      />
+    </div>
+    <div class="container">
+      <header>
+        <div class="logo">
+          <i class="fas fa-forum"></i>
+          <h1 id="welcomeMessage"></h1>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="post-form">
+          <h2 style="margin: 10px">Create a Post</h2>
+          <input
+            type="text"
+            id="postTitle"
+            placeholder="Title"
+            style="margin-bottom: 10px; width: 100%; padding: 8px"
+          />
+          <textarea
+            id="postContent"
+            placeholder="What's on your mind?"
+          ></textarea>
+          <button id="createPostBtn" type="submit">
+            <i class="fas fa-paper-plane"></i>
+            Post
+          </button>
+        </div>
+        <div class="posts" id="postsContainer"></div>
+      </div>
+    </div>
+    <script src="./scripts/access.js"></script>
+    <script src="scripts/index.js"></script>
+  </body>
+</html>

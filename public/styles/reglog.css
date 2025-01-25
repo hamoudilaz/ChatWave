@@ -1,0 +1,93 @@
+body {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  min-height: 100vh;
+}
+
+#wrapper {
+  margin-top: 100px;
+  margin-bottom: 400px;
+  justify-content: space-evenly;
+  display: flex;
+}
+.registration-form {
+  background: #ffffff;
+  color: #000;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+.form-control:focus {
+  box-shadow: 0 0 10px rgba(38, 143, 255, 0.5);
+  border-color: #268fff;
+}
+.form-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.form-header h2 {
+  font-weight: bold;
+}
+.form-header p {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+.btn-custom {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  border: none;
+  transition: background 0.3s ease;
+}
+.btn-custom:hover {
+  color: rgb(184, 184, 184);
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+}
+.text-muted {
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.login-form {
+  background: #ffffff;
+  color: #000;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+.success-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #28a745; /* Green background */
+  color: white;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  opacity: 0;
+}
+
+.success-message i {
+  margin-right: 10px; /* Space between the icon and text */
+  font-size: 1.5rem;
+}
+
+.success-message.show {
+  opacity: 1; /* Fade-in effect */
+}
+
+.success-message.hide {
+  opacity: 0; /* Fade-out effect */
+}
+
+footer {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
