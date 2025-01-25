@@ -1,9 +1,15 @@
 import express from "express";
 import router from "./routes/route.js";
 import cookieParser from "cookie-parser";
-
+import cors from "cors";
 const app = express();
 
+const corsOptions = {
+  origin: "https://hamoudilaz.github.io/ChatWave/", // Your GitHub Pages URL
+  credentials: true, // Allow cookies to be sent
+};
+
+app.use(cors(corsOptions));
 // Parse JSON request bodies
 app.use(express.json());
 
