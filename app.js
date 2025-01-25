@@ -2,11 +2,22 @@ import express from "express";
 import router from "./routes/route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-const app = express();
+const allowedOrigins = [
+  "https://hamoudilaz.github.io", // GitHub Pages URL
+  "https://chatwave-b0sx.onrender.com", // Render Backend URL (if needed for frontend-backend communication)
+  "http://localhost:3000", // For local development
+];
 
 const corsOptions = {
-  origin: "https://hamoudilaz.github.io/ChatWave/", // Your GitHub Pages URL
-  credentials: true, // Allow cookies to be sent
+  origin: function (origin, callback) {
+    // Allow requests from allowed origins or no origin (e.g., Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Allow credentials (cookies, etc.)
 };
 
 app.use(cors(corsOptions));
