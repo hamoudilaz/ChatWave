@@ -20,6 +20,7 @@ const corsOptions = {
   credentials: true, // Allow credentials (cookies, etc.)
 };
 
+const app = express();
 app.use(cors(corsOptions));
 // Parse JSON request bodies
 app.use(express.json());
