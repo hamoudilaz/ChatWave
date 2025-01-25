@@ -10,7 +10,7 @@ router.post("/register", handleRegister);
 // LOGIN ROUTE
 router.post("/api/login", handleLogin);
 router.get("/loginPage", (req, res) => {
-  res.sendFile("login.html", { root: "./public" });
+  res.sendFile("login.html", { root: "./docs" });
 });
 // LOGOUT ROUTE
 router.post("/logout", (req, res) => {
@@ -22,11 +22,11 @@ router.post("/logout", (req, res) => {
 
 // MAIN PAGE ROUTE
 router.get("/index.html", authenticateUser, (req, res) => {
-  res.sendFile("index.html", { root: "./public" });
+  res.sendFile("index.html", { root: "./docs" });
 });
 
 router.get("/protected/dashboard", authenticateUser, (req, res) => {
-  res.sendFile("protected/dashboard.html", { root: "./public" });
+  res.sendFile("protected/dashboard.html", { root: "./docs" });
 });
 
 router.get("/protected/profile", authenticateUser, (req, res) => {
@@ -34,7 +34,7 @@ router.get("/protected/profile", authenticateUser, (req, res) => {
     return res.redirect("/login.html");
   }
   console.log("User authenticated:", req.user);
-  res.sendFile("profile.html", { root: "./public/protected" });
+  res.sendFile("profile.html", { root: "./docs/protected" });
 });
 
 router.get("/protected/profile-data", authenticateUser, async (req, res) => {
