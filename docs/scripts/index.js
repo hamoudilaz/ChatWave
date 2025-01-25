@@ -194,8 +194,10 @@ function editPost(post) {
   const currentContent = postContentElement.textContent;
   postContentElement.innerHTML = `
       <input type="text" id="edit-input-${post._id}" value="${currentContent}" class="edit-input">
+      <div style="display: flex;">
       <button id="save-btn-${post._id}" class="save-btn">Save</button>
       <button id="cancel-btn-${post._id}" class="cancel-btn">Cancel</button>
+      </div>
     `;
 
   document

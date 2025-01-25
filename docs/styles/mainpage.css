@@ -240,13 +240,6 @@ header {
   color: var(--text-secondary);
 }
 
-.post-content,
-.comments-list p {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
-}
-
 .post-actions {
   font-size: 0.9rem;
   color: var(--text-secondary);

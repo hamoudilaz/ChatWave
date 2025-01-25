@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Serve static files (e.g., HTML, CSS, JS)
-app.use(express.static("public"));
+app.use(express.static("docs"));
 
 // Use router after middleware
 app.use("/", router);
