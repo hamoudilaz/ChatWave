@@ -7,17 +7,18 @@ import pkg from "express-openid-connect";
 const { auth, requiresAuth } = pkg;
 
 const allowedOrigins = [
-  "https://hamoudilaz.github.io", // GitHub Pages URL
-  "https://chatwave-b0sx.onrender.com", // Render Backend URL
-  "http://localhost:3000", // Local development frontend
-  "https://dev-jvkh4vhh2aigi4aa.us.auth0.com", // Auth0 for local development
+  "http://localhost:3000",
+  "https://hamoudilaz.github.io",
+  "https://chatwave.se",
+  "https://www.chatwave.se", // ✅ Add www version
+  "https://dev-jvkh4vhh2aigi4aa.us.auth0.com",
 ];
 
 const config = {
   authRequired: false,
   auth0Logout: true,
   secret: "a long, randomly-generated string stored in env",
-  baseURL: "https://chatwave-b0sx.onrender.com",
+  baseURL: "https://chatwave.se",
   clientID: "xia9JvjYsRl5URhTtaTzMbvJ0xS7L7WA",
   issuerBaseURL: "https://dev-jvkh4vhh2aigi4aa.us.auth0.com",
 };

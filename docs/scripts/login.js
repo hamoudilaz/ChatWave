@@ -63,6 +63,8 @@ document
   .querySelector("button[type='submit']")
   .addEventListener("click", login);
 
-document.getElementById("auth0Login").addEventListener("click", () => {
-  window.location.href = "/login"; // Redirect to the Auth0 login route
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("oauthButton").addEventListener("click", function () {
+    window.location.href = "/login";
+  });
 });

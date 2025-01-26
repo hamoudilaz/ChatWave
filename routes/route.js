@@ -3,6 +3,7 @@ import { authenticateUser } from "../middlewares/authMiddleware.js";
 import { handleLogin, handleRegister } from "../middlewares/authController.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import xss from "xss";
 
 const router = Router();
 
@@ -72,9 +73,12 @@ router.post("/api/posts", authenticateUser, async (req, res) => {
         .json({ message: "Title and content cannot be empty" });
     }
 
+    const sanitizedTitle = xss(title);
+    const sanitizedContent = xss(content);
+
     const newPost = new Post({
-      title,
-      content,
+      title: sanitizedTitle,
+      content: sanitizedContent,
       userId: req.user.id, // Attach the user ID from the authenticated user
     });
 
@@ -182,10 +186,11 @@ router.post(
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
+      const sanitizedContent = xss(content);
 
       const comment = {
         userId: req.user.id,
-        content,
+        content: sanitizedContent,
         createdAt: new Date(),
       };
 
