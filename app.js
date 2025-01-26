@@ -17,7 +17,7 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: "a long, randomly-generated string stored in env",
-  baseURL: "http://localhost:3000",
+  baseURL: "https://chatwave-b0sx.onrender.com",
   clientID: "xia9JvjYsRl5URhTtaTzMbvJ0xS7L7WA",
   issuerBaseURL: "https://dev-jvkh4vhh2aigi4aa.us.auth0.com",
 };

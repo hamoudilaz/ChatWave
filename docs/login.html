@@ -13,7 +13,9 @@
   <body>
     <div id="wrapper">
       <div style="display: flex; align-items: center">
-        <h1>Welcome to ChatWave!</h1>
+        <h1 style="font-size: clamp(1.5rem, 5vw, 3rem); white-space: nowrap">
+          Welcome to ChatWave!
+        </h1>
         <img
           style="width: 150px"
           src="images/DALL_E_2025-01-22_12.41.23_-_A_clean_and_professional_logo_design_for__ChatWave___a_forum_brand._The_logo_features_a_wave_seamlessly_integrated_with_a_speech_bubble__symbolizing_c-removebg-preview.png"
@@ -56,26 +58,24 @@
             />
           </div>
           <button type="submit" class="btn btn-custom w-100">Sign In</button>
-          <button
-            onclick="window.location.href='/login'"
-            style="padding: 10px 20px; font-size: 16px; cursor: pointer"
-          >
-            Login with OAuth
-          </button>
-      
+        </form>
+
+        <button onclick="window.location.href='/login'" class="oauthBtn">
+          <img
+            src="https://cdn.auth0.com/styleguide/latest/lib/logos/img/badge.png"
+            alt="Auth0 Logo"
+            class="auth0-logo"
+          />
+          Login with OAuth
+        </button>
+
         <div class="text-muted">
           Dont have an account?
           <a href="register.html" class="text-primary">Register</a>
         </div>
       </div>
     </div>
-    <button
-    type="button"
-    class="btn btn-secondary w-100 mt-3"
-    id="auth0Login" window.location.href='/login'
-  >
-    Login with OAuth
-  </button>
+
     <footer>
       <p>Copyright © 2025 ChatWave. All Rights Reserved</p>
     </footer>
