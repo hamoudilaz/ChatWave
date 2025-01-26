@@ -62,3 +62,7 @@ async function login(event) {
 document
   .querySelector("button[type='submit']")
   .addEventListener("click", login);
+
+document.getElementById("auth0Login").addEventListener("click", () => {
+  window.location.href = "/login"; // Redirect to the Auth0 login route
+});

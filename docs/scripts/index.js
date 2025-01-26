@@ -138,7 +138,8 @@ function renderPosts(posts) {
     return;
   }
 
-  posts.forEach((post) => {
+  // Reverse the order of posts to display the newest first
+  posts.reverse().forEach((post) => {
     const postElement = createPostElement(post);
     postsContainer.appendChild(postElement);
   });
@@ -263,7 +264,7 @@ async function addComment(postId) {
     if (response.ok) {
       const { comment } = await response.json();
       const commentsList = document.getElementById(`comments-list-${postId}`);
-
+      console.log(comment);
       const newComment = document.createElement("li");
       const formattedDate = new Date(comment.createdAt).toLocaleString();
       newComment.innerHTML = `<strong>${

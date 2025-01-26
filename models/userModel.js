@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const Schema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -14,7 +14,14 @@ const Schema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.provider === "local"; // Require password only for local users
+      },
+    },
+    provider: {
+      type: String,
+      enum: ["local", "oauth"], // Define user source
+      default: "local", // Default to local users
     },
     role: {
       type: String,
@@ -23,8 +30,8 @@ const Schema = mongoose.Schema(
     },
   },
   { timestamps: true }
-); // Add this line
+);
 
-const User = mongoose.model("User", Schema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

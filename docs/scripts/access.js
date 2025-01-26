@@ -10,19 +10,21 @@ async function validateUser() {
 
     const data = await response.json();
 
-    if (data.user.role === "admin") {
-      welcomeMessage.innerText = `Welcome, ${data.user.username} (Admin)`;
-    } else {
-      welcomeMessage.innerText = `Welcome, ${data.user.username}`;
-    }
-
     if (response.ok) {
-      console.log(data);
-      console.log(data.user.role);
+      if (data.user) {
+        // Display welcome message
+        const displayName = data.user.name || data.user.username; // Use `name` for Auth0 or `username` for JWT
+        const roleMessage = data.user.role === "admin" ? " (Admin)" : "";
+        welcomeMessage.innerText = `Welcome, ${displayName}${roleMessage}`;
 
-      currentUser = data.user; // Store the user data globally
+        // Store the user data globally
+        currentUser = data.user;
+
+        console.log(data.user);
+      } else {
+        throw new Error("User data missing in response.");
+      }
     } else {
-      alert("Unauthorized access. Redirecting to login.");
       window.location.href = "/login.html";
     }
   } catch (error) {
@@ -31,20 +33,22 @@ async function validateUser() {
     window.location.href = "/login.html";
   }
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   validateUser();
 });
 
 async function logout() {
   try {
+    // Handle JWT logout (POST /logout)
     const response = await fetch("/logout", {
       method: "POST",
       credentials: "include",
     });
 
     if (response.ok) {
-      alert("You have been logged out.");
-      window.location.href = "login.html";
+      alert("You Logged out");
+      window.location.href = "/logout";
     } else {
       alert("Failed to log out.");
     }

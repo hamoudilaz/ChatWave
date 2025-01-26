@@ -3,12 +3,15 @@ import { authenticateUser } from "../middlewares/authMiddleware.js";
 import { handleLogin, handleRegister } from "../middlewares/authController.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+
 const router = Router();
 
 // REGISTER ROUTE
+
 router.post("/register", handleRegister);
 // LOGIN ROUTE
 router.post("/api/login", handleLogin);
+
 router.get("/loginPage", (req, res) => {
   res.sendFile("login.html", { root: "./docs" });
 });
@@ -30,11 +33,7 @@ router.get("/protected/dashboard", authenticateUser, (req, res) => {
 });
 
 router.get("/protected/profile", authenticateUser, (req, res) => {
-  if (!req.user) {
-    return res.redirect("/login.html");
-  }
-  console.log("User authenticated:", req.user);
-  res.sendFile("profile.html", { root: "./docs/protected" });
+  res.redirect("/protected/profile.html");
 });
 
 router.get("/protected/profile-data", authenticateUser, async (req, res) => {
@@ -100,12 +99,11 @@ router.get("/api/posts", authenticateUser, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch posts" });
   }
 });
-
 router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.user.id; // The ID of the currently authenticated user
-    const userRole = req.user.role; // The role of the logged-in user (admin or user)
+    const userId = req.user.id.toString(); // Convert userId to a string
+    const userRole = req.user.role;
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -114,6 +112,10 @@ router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
 
     // Allow admin to delete any post or the post owner to delete their own post
     if (userRole !== "admin" && post.userId.toString() !== userId) {
+      console.log("Unauthorized deletion attempt:", {
+        postUserId: post.userId.toString(),
+        userId: userId,
+      });
       return res
         .status(403)
         .json({ message: "Unauthorized: You cannot delete this post" });
@@ -132,7 +134,7 @@ router.put("/api/posts/:id", authenticateUser, async (req, res) => {
   try {
     const postId = req.params.id;
     const { content } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.id.toString(); // Convert userId to a string
     const userRole = req.user.role;
 
     if (!content) {
@@ -151,6 +153,7 @@ router.put("/api/posts/:id", authenticateUser, async (req, res) => {
         .json({ message: "Unauthorized: You cannot edit this post" });
     }
 
+    // Update the post content
     post.content = content;
     await post.save();
 
