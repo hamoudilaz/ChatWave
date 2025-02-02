@@ -19,6 +19,8 @@ async function getCsrfToken() {
   }
 }
 async function register() {
+  const redirecting = document.getElementById("redirecting");
+
   const passwordInput = DOMPurify.sanitize(
     document.getElementById("password").value
   );
@@ -33,7 +35,6 @@ async function register() {
   const successMessage = document.getElementById("successMessage");
 
   try {
-    // Fetch CSRF token
     const csrfToken = await getCsrfToken();
 
     const response = await fetch("/register", {
@@ -59,10 +60,16 @@ async function register() {
       successMessage.style.display = "flex";
       successMessage.classList.add("show");
       successMessage.classList.remove("hide");
-
+      setTimeout(() => {
+        redirecting.style.display = "flex";
+        redirecting.textContent = "Redirecting to login page...";
+      }, 1000);
       setTimeout(() => {
         successMessage.classList.add("hide");
       }, 3000);
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 2500);
     } else {
       console.error("Error:", data.message);
       alert(data.message);

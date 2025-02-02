@@ -1,6 +1,5 @@
 .navbar {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
@@ -48,7 +47,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
   transition: all 0.3s ease;
 }
 
@@ -65,6 +63,7 @@
   align-items: center;
   flex-direction: row;
 }
+
 .header h1 {
   font-size: clamp(2rem, 4vw, 4rem);
   font-weight: 600;
@@ -78,4 +77,42 @@
 
 .likes {
   color: rgb(149, 149, 149);
+}
+
+/* Responsive Navbar */
+.menu-toggle {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: #edf2f7;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .header img {
+    max-width: 100px;
+  }
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background: #1e1e1e;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-list.active {
+    display: flex;
+  }
+  .header h1 {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+  }
 }

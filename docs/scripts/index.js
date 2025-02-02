@@ -71,12 +71,14 @@ function createPostElement(post) {
   postElement.innerHTML = `
 <div class="post-header"> 
   
-  <p><strong>${displayName} Posted:</strong></p>
+  <p class="post-timestamp">${postDate}</p>
   <div class="timeStamp">
     <div class="button-container"></div>
-    <p class="post-timestamp">${postDate}</p>
+  
   </div>
+
 </div>
+    <p class="postAuthor"><strong>${displayName} Posted:</strong></p>
 <h3 id="post-title">${post.title}</h3> 
 <p class="post-content" id="content-${post._id}">${post.content}</p>
 <div class="likes">
@@ -97,7 +99,8 @@ function createPostElement(post) {
   <textarea id="comment-input-${
     post._id
   }" placeholder="Write a comment..."></textarea>
-  <button onclick="addComment('${post._id}')">Add Comment</button>
+ <button class="add-comment-btn" data-post-id="${post._id}">Add Comment</button>
+
 </div>
 `;
 
@@ -112,30 +115,27 @@ function createCommentElement(comment) {
     comment.userId?.username || "Anonymous"
   )}:</strong> ${DOMPurify.sanitize(
     comment.content
-  )} <small>(${commentDate})</small></li>`;
+  )} <small>${commentDate}</small></li>`;
 }
 
 function addPostButtons(post, postElement) {
   const buttonContainer = postElement.querySelector(".button-container");
 
-  // **Ensure Like Button is NOT recreated multiple times**
   let likeButton = buttonContainer.querySelector(`#like-btn-${post._id}`);
   if (!likeButton) {
     likeButton = document.createElement("button");
     likeButton.className = "like-btn transparent-btn";
     likeButton.id = `like-btn-${post._id}`;
-    likeButton.innerHTML = `<i class="fas fa-thumbs-up"></i> <span>${
+    likeButton.innerHTML = `<i class="fas fa-thumbs-up"></i> <span class="likeCount">${
       post.likes.length || 0
     }</span>`;
 
-    // **Attach event listener ONLY ONCE**
     likeButton.addEventListener("click", () =>
       toggleLike(post._id, likeButton)
     );
 
     buttonContainer.appendChild(likeButton);
   } else {
-    // **Only update the like count, do not add a new button**
     likeButton.querySelector("span").textContent = post.likes.length || 0;
   }
 
@@ -263,7 +263,7 @@ function editPost(post) {
 
         if (response.ok) {
           alert("Post updated successfully!");
-          loadPosts(); // Reload posts after editing
+          loadPosts();
         } else {
           const errorData = await response.json();
           alert(errorData.message || "Failed to update post");
@@ -326,12 +326,11 @@ async function addComment(postId) {
 async function toggleLike(postId, likeButton) {
   const postElement = likeButton.closest(".post");
   const likesText = postElement.querySelector(".likes p span");
-  const likeButtonCount = likeButton.querySelector("span"); // Like count inside button
+  const likeButtonCount = likeButton.querySelector("span");
   const likedUsersContainer = postElement.querySelector(".liked-users");
 
-  let isLiking = !likeButton.classList.contains("liked"); // Check if user is liking or unliking
+  let isLiking = !likeButton.classList.contains("liked");
 
-  // **Store old values in case request fails**
   const oldLikes = parseInt(likesText.textContent, 10) || 0;
   const oldLikedState = likeButton.classList.contains("liked");
 
@@ -345,7 +344,6 @@ async function toggleLike(postId, likeButton) {
       const data = await response.json();
       const newLikes = data.likes.length;
 
-      // **Update UI only once after API response**
       likesText.textContent = newLikes;
       likeButtonCount.textContent = newLikes;
       likeButton.classList.toggle("liked", data.likes.includes(currentUser.id));
@@ -361,9 +359,23 @@ async function toggleLike(postId, likeButton) {
     console.error("Error toggling like:", error);
     alert("An error occurred while toggling like.");
 
-    // **Revert UI if request fails**
     likesText.textContent = oldLikes;
     likeButtonCount.textContent = oldLikes;
     likeButton.classList.toggle("liked", oldLikedState);
   }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const postsContainer = document.getElementById("postsContainer");
+
+  if (postsContainer) {
+    postsContainer.addEventListener("click", function (event) {
+      if (event.target.classList.contains("add-comment-btn")) {
+        const postId = event.target.getAttribute("data-post-id");
+        addComment(postId);
+      }
+    });
+  } else {
+    console.error("Error: postsContainer not found");
+  }
+});

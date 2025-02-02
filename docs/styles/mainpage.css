@@ -142,16 +142,72 @@ header {
 }
 
 @media (max-width: 768px) {
+  .post {
+    padding: 1.1rem !important;
+  }
+  .comments-section button {
+    padding: 0.2rem 0.2rem !important;
+    width: 100% !important;
+  }
+  .comments-section textarea {
+    min-height: 10px !important;
+    max-height: 30px !important;
+  }
+  .comments-section h4 {
+    font-size: 0.7rem;
+  }
+  .post-content {
+    font-size: 0.8rem !important;
+  }
+  #post-title {
+    font-size: 1rem !important;
+  }
+  .postAuthor {
+    font-size: 1.2rem !important;
+  }
+  .timeStamp {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .button-container {
+    display: flex;
+  }
   .container {
     padding: 1rem;
   }
 
-  header {
+  .grid {
     flex-direction: column;
     gap: 1rem;
   }
-}
 
+  .post-form {
+    padding: 1rem;
+  }
+
+  .post-form textarea {
+    min-height: 80px;
+  }
+
+  .edit-btn,
+  .delete-btn,
+  .cancel-btn,
+  .save-btn,
+  .like-btn {
+    margin: 5px !important;
+    width: 100%;
+    text-align: center;
+    padding: 7px 15px 7px 15px !important;
+  }
+  .likeCount {
+    display: none;
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
 @keyframes gradientFlow {
   0% {
     background-position: 0% 50%;
@@ -214,9 +270,15 @@ header {
   margin-bottom: 0.5rem;
 }
 
-.post-header p strong {
-  font-size: 1.2rem;
+.postAuthor {
+  font-size: 1.3rem;
   font-weight: 900;
+  margin-bottom: 20px;
+}
+
+#post-title {
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 .post-author {
   font-size: 0.9rem;
@@ -229,6 +291,7 @@ header {
   margin: 0.5rem 0;
 }
 .post-timestamp {
+  align-self: baseline;
   font-size: 0.8rem;
   color: #888;
 }
@@ -322,7 +385,7 @@ header {
   max-height: 100px;
   border: 1px solid var(--text-secondary);
   border-radius: 8px;
-  padding: 0.5rem;
+  padding: 5px;
   background: var(--card-bg);
   color: var(--text-primary);
 }

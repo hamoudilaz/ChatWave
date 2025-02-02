@@ -15,18 +15,18 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider === "local"; // Require password only for local users
+        return this.provider === "local";
       },
     },
     provider: {
       type: String,
-      enum: ["local", "oauth"], // Define user source
-      default: "local", // Default to local users
+      enum: ["local", "oauth"],
+      default: "local",
     },
     role: {
       type: String,
-      enum: ["user", "admin"], // Define roles
-      default: "user", // Default to "user"
+      enum: ["user", "admin"],
+      default: "user",
     },
   },
   { timestamps: true }

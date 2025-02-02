@@ -117,7 +117,7 @@ footer {
 
   .login-form,
   .registration-form {
-    max-width: 100%; /* Use full width */
+    max-width: 70%; /* Use full width */
     padding: 1.5rem;
   }
 
@@ -166,10 +166,11 @@ footer {
   border-radius: 4px; /* Slightly rounded edges */
   cursor: pointer; /* Pointer cursor on hover */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-  transition: all 0.3s ease; /* Smooth hover effect */
+  transition: all 0.1s ease; /* Smooth hover effect */
 }
 
 .oauthBtn:hover {
+  background-color: rgb(0, 0, 0);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Increase shadow on hover */
 }
 

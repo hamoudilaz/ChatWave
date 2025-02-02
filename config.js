@@ -1,24 +1,23 @@
 import rateLimit from "express-rate-limit";
 
 const allowedOrigins = [
-  "https://hamoudilaz.github.io", // GitHub Pages URL
-  "https://chatwave-b0sx.onrender.com", // Render Backend URL
-  "http://localhost:3000", // Local development frontend
-  "https://dev-jvkh4vhh2aigi4aa.us.auth0.com", // Auth0 for local development
+  "http://localhost:3000",
+  "https://chatwave.se",
+  "https://www.chatwave.se",
+  "https://dev-jvkh4vhh2aigi4aa.us.auth0.com",
 ];
 
-const authConfig = {
+const config = {
   authRequired: false,
   auth0Logout: true,
-  secret: "a long, randomly-generated string stored in env",
-  baseURL: "https://chatwave-b0sx.onrender.com",
+  secret: process.env.AUTH_SECRET,
+  baseURL: "https://chatwave.se",
   clientID: "xia9JvjYsRl5URhTtaTzMbvJ0xS7L7WA",
   issuerBaseURL: "https://dev-jvkh4vhh2aigi4aa.us.auth0.com",
 };
 
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log("Incoming Origin:", origin); // Log the origin for debugging
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -26,12 +25,35 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true, // Allow credentials (cookies, etc.)
+  credentials: true,
 };
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 5, // Max 5 login attempts per IP
+  message: { message: "Too many login attempts. Try again in 5 minutes." },
+  standardHeaders: true, // Include rate limit headers
+  legacyHeaders: false, // Disable old headers
 });
 
-export { allowedOrigins, authConfig, corsOptions, apiLimiter };
+const helmetConfig = {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "'unsafe-inline'", // Optional if you use inline scripts
+      ],
+      styleSrc: [
+        "'self'",
+        "https://cdnjs.cloudflare.com", // ✅ Allow Cloudflare for styles
+        "https://cdn.jsdelivr.net", // ✅ Allow jsDelivr
+        "'unsafe-inline'", // Needed if inline styles are used
+      ],
+      imgSrc: ["'self'", "data:", "https://your-image-cdn.com"], // Adjust as needed
+    },
+  },
+};
+
+export { allowedOrigins, config, corsOptions, loginLimiter, helmetConfig };

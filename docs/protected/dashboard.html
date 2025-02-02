@@ -13,12 +13,13 @@
   </head>
   <body>
     <nav class="navbar">
+      <button class="menu-toggle" id="toggleMenu">☰</button>
       <ul class="nav-list">
         <li><a href="/protected/dashboard" id="dashboardBtn">Dashboard</a></li>
         <li><a href="/protected/profile" id="profileBtn">Profile</a></li>
         <li><a href="/index.html" id="homepageBtn">Homepage</a></li>
       </ul>
-      <button onclick="logout()" class="logout-btn">
+      <button id="logout" class="logout-btn">
         <i class="fas fa-sign-out-alt"></i>
         Logout
       </button>
@@ -65,5 +66,13 @@
     </div>
     <script src="../scripts/access.js"></script>
     <script src="../scripts/dashboard.js"></script>
+    <script>
+      document
+        .getElementById("toggleMenu")
+        .addEventListener("click", toggleMenu);
+      function toggleMenu() {
+        document.querySelector(".nav-list").classList.toggle("active");
+      }
+    </script>
   </body>
 </html>

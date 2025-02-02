@@ -5,17 +5,34 @@ import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import xss from "xss";
 import csurf from "csurf";
+
 const router = Router();
 
 const csrfProtection = csurf({ cookie: true });
-// CSRF TOKEN ROUTE
+
+const validateCsrf = (req, res, next) => {
+  console.log("CSRF TOKEN:", req.cookies._csrf);
+  if (!req.cookies._csrf) {
+    return res
+      .status(403)
+      .json({ message: "CSRF token is invalid or missing" });
+  }
+  next();
+};
+
+// TOKEN ROUTE
+router.post("/validateToken", authenticateUser, (req, res) => {
+  res.status(200).json({ message: "Token is valid", user: req.user });
+});
+
 router.get("/get-csrf-token", csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
+
 // REGISTER ROUTE
 router.post("/register", csrfProtection, handleRegister);
 // LOGIN ROUTE
-router.post("/api/login", csrfProtection, handleLogin);
+router.post("/api/login", validateCsrf, handleLogin);
 
 router.get("/loginPage", (req, res) => {
   res.sendFile("login.html", { root: "./docs" });
@@ -23,7 +40,8 @@ router.get("/loginPage", (req, res) => {
 // LOGOUT ROUTE
 router.post("/logout", (req, res) => {
   res
-    .clearCookie("token", { httpOnly: true, sameSite: "strict" })
+    .clearCookie("token", { httpOnly: true, sameSite: "strict" }) // Delete JWT
+    .clearCookie("_csrf", { httpOnly: true, sameSite: "strict" }) // Delete CSRF token
     .status(200)
     .json({ message: "Logged out successfully" });
 });
@@ -62,11 +80,7 @@ router.get("/protected/profile-data", authenticateUser, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user data" });
   }
 });
-
-router.post("/validateToken", authenticateUser, (req, res) => {
-  res.status(200).json({ message: "Token is valid", user: req.user });
-});
-
+// POST ROUTE
 router.post("/api/posts", authenticateUser, async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -83,7 +97,7 @@ router.post("/api/posts", authenticateUser, async (req, res) => {
     const newPost = new Post({
       title: sanitizedTitle,
       content: sanitizedContent,
-      userId: req.user.id, // Attach the user ID from the authenticated user
+      userId: req.user.id,
     });
 
     await newPost.save();
@@ -95,23 +109,25 @@ router.post("/api/posts", authenticateUser, async (req, res) => {
     res.status(500).json({ message: "Failed to create post" });
   }
 });
-
+//
 router.get("/api/posts", authenticateUser, async (req, res) => {
   try {
     const posts = await Post.find({})
       .populate("userId", "username role")
       .populate("comments.userId", "username")
-      .populate("likes", "username"); // Populate likes with usernames
+      .populate("likes", "username");
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ message: "Failed to fetch posts" });
   }
 });
+
+// DELETE ROUTE
 router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.user.id.toString(); // Convert userId to a string
+    const userId = req.user.id.toString();
     const userRole = req.user.role;
 
     const post = await Post.findById(postId);
@@ -119,7 +135,6 @@ router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Allow admin to delete any post or the post owner to delete their own post
     if (userRole !== "admin" && post.userId.toString() !== userId) {
       console.log("Unauthorized deletion attempt:", {
         postUserId: post.userId.toString(),
@@ -130,7 +145,6 @@ router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
         .json({ message: "Unauthorized: You cannot delete this post" });
     }
 
-    // Delete the post
     await Post.findByIdAndDelete(postId);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
@@ -143,7 +157,7 @@ router.put("/api/posts/:id", authenticateUser, async (req, res) => {
   try {
     const postId = req.params.id;
     const { content } = req.body;
-    const userId = req.user.id.toString(); // Convert userId to a string
+    const userId = req.user.id.toString();
     const userRole = req.user.role;
 
     if (!content) {
@@ -155,14 +169,12 @@ router.put("/api/posts/:id", authenticateUser, async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Allow admin to edit any post or the post owner to edit their own post
     if (userRole !== "admin" && post.userId.toString() !== userId) {
       return res
         .status(403)
         .json({ message: "Unauthorized: You cannot edit this post" });
     }
 
-    // Update the post content
     post.content = content;
     await post.save();
 
@@ -202,7 +214,7 @@ router.post(
       post.comments.push(comment);
       await post.save();
 
-      const commentUser = await User.findById(req.user.id); // Get user details for the comment
+      const commentUser = await User.findById(req.user.id);
       res.status(200).json({
         message: "Comment added successfully",
         comment: {
@@ -226,12 +238,11 @@ router.post("/api/posts/:id/like", authenticateUser, async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Check if the user has already liked the post
     const userIndex = post.likes.indexOf(req.user.id);
     if (userIndex === -1) {
-      post.likes.push(req.user.id); // Add user to likes
+      post.likes.push(req.user.id);
     } else {
-      post.likes.splice(userIndex, 1); // Remove user from likes (toggle)
+      post.likes.splice(userIndex, 1);
     }
 
     await post.save();
@@ -245,7 +256,7 @@ router.post("/api/posts/:id/like", authenticateUser, async (req, res) => {
       likes: likedUsers.map((user) => ({
         id: user._id,
         username: user.username,
-      })), // Send list of users who liked
+      })),
     });
   } catch (error) {
     console.error("Error toggling like:", error);
@@ -255,17 +266,16 @@ router.post("/api/posts/:id/like", authenticateUser, async (req, res) => {
 
 router.get("/api/stats", authenticateUser, async (req, res) => {
   try {
-    const postCount = await Post.countDocuments();
-    const allPosts = await Post.find({}, "likes comments");
+    const userId = req.user.id;
 
-    const likeCount = allPosts.reduce(
-      (sum, post) => sum + post.likes.length,
-      0
-    );
-    const commentCount = allPosts.reduce(
-      (sum, post) => sum + post.comments.length,
-      0
-    );
+    const postCount = await Post.countDocuments({ userId });
+
+    const likedPosts = await Post.find({ likes: userId });
+    const likeCount = likedPosts.length;
+
+    const commentCount = await Post.countDocuments({
+      "comments.userId": userId,
+    });
 
     res.status(200).json({ postCount, likeCount, commentCount });
   } catch (error) {
@@ -273,4 +283,5 @@ router.get("/api/stats", authenticateUser, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch stats" });
   }
 });
+
 export default router;

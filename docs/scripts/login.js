@@ -32,7 +32,6 @@ async function login(event) {
   }
 
   try {
-    // ✅ Fetch CSRF token before sending the request
     const csrfToken = await getCsrfToken();
     console.log(csrfToken);
     if (!csrfToken) {
@@ -44,7 +43,7 @@ async function login(event) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "CSRF-Token": csrfToken, // ✅ Ensure CSRF token is sent
+        "CSRF-Token": csrfToken,
       },
       credentials: "include",
       body: JSON.stringify({ usernameInput, passwordInput }),
@@ -86,7 +85,11 @@ document
   .addEventListener("click", login);
 
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("oauthButton").addEventListener("click", function () {
-    window.location.href = "/login";
-  });
+  document
+    .getElementById("oauthButton")
+    .addEventListener("click", async function () {
+      const csrfToken = await getCsrfToken();
+      console.log(csrfToken);
+      window.location.href = "/login";
+    });
 });
