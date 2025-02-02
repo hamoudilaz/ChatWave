@@ -100,27 +100,6 @@ header {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
-.post-form button {
-  color: white;
-  padding: 10px 20px 10px 20px;
-  border-radius: 10px;
-  background: linear-gradient(
-    135deg,
-    var(--accent-primary),
-    var(--accent-secondary)
-  );
-  transition: all 0.3s ease;
-  transform-style: preserve-3d;
-  margin: 10px;
-  border: none;
-  box-shadow: 0px 0px 13px rgb(black);
-}
-
-.post-form button:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
 .post {
   gap: 10px;
   display: flex;
@@ -235,6 +214,10 @@ header {
   margin-bottom: 0.5rem;
 }
 
+.post-header p strong {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
 .post-author {
   font-size: 0.9rem;
   color: var(--text-secondary);
@@ -266,7 +249,8 @@ header {
 .cancel-btn,
 .save-btn,
 .comments-section button,
-.like-btn {
+.like-btn,
+.createPostBtn {
   color: white;
   padding: 10px 20px 10px 20px;
   border-radius: 10px;
@@ -287,7 +271,8 @@ header {
 .delete-btn:hover,
 .cancel-btn:hover,
 .save-btn:hover,
-.like-btn:hover {
+.like-btn:hover,
+.createPostBtn:hover {
   background: linear-gradient(
     135deg,
     var(--accent-secondary),
@@ -302,7 +287,8 @@ header {
 .delete-btn:active,
 .cancel-btn:active,
 .save-btn:active,
-.like-btn:active {
+.like-btn:active,
+.createPostBtn:active {
   transform: scale(1) translateZ(1px);
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.6);
 }
@@ -388,5 +374,15 @@ strong {
 .post-form h2 {
   font-size: 1.8rem;
 
+  margin-bottom: 1rem;
+}
+
+.liked-users {
+  font-size: 13px;
+}
+
+.description {
+  font-size: 1.2rem;
+  color: #edf2f7;
   margin-bottom: 1rem;
 }

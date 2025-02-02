@@ -23,11 +23,18 @@
         Logout
       </button>
     </nav>
+    <div class="header">
+      <h1>Stats Tracker</h1>
+      <img
+        class="logo"
+        src="../images/DALL_E_2025-01-22_12.41.23_-_A_clean_and_professional_logo_design_for__ChatWave___a_forum_brand._The_logo_features_a_wave_seamlessly_integrated_with_a_speech_bubble__symbolizing_c-removebg-preview.png"
+      />
+    </div>
     <div class="container">
       <header>
         <div class="logo">
           <i class="fas fa-forum"></i>
-          <h1>Community Forum</h1>
+
           <h1 id="welcomeMessage"></h1>
         </div>
       </header>
@@ -35,13 +42,28 @@
       <div class="grid">
         <div id="dashboardContent">
           <h2>Dashboard</h2>
-          <p>
+          <p class="description">
             Welcome to your dashboard! Here you can see recent activity and
             analytics.
           </p>
+          <div class="stats">
+            <p>
+              <strong>Total Posts:</strong>
+              <span id="postCount">Loading...</span>
+            </p>
+            <p>
+              <strong>Total Likes:</strong>
+              <span id="likeCount">Loading...</span>
+            </p>
+            <p>
+              <strong>Total Comments:</strong>
+              <span id="commentCount">Loading...</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
     <script src="../scripts/access.js"></script>
+    <script src="../scripts/dashboard.js"></script>
   </body>
 </html>

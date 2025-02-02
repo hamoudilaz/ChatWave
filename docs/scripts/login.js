@@ -1,6 +1,16 @@
 let loginAttempts = 0;
 let lockoutTime = null;
 
+async function getCsrfToken() {
+  const response = await fetch("/get-csrf-token", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  return data.csrfToken;
+}
+
 async function login(event) {
   event.preventDefault();
   const errorMsg = document.getElementById("invalidPass");
@@ -22,9 +32,21 @@ async function login(event) {
   }
 
   try {
+    // ✅ Fetch CSRF token before sending the request
+    const csrfToken = await getCsrfToken();
+    console.log(csrfToken);
+    if (!csrfToken) {
+      alert("CSRF token missing. Refresh the page.");
+      return;
+    }
+
     const response = await fetch("/api/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "CSRF-Token": csrfToken, // ✅ Ensure CSRF token is sent
+      },
+      credentials: "include",
       body: JSON.stringify({ usernameInput, passwordInput }),
     });
 

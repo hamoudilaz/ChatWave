@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js"; // Adjust path as needed
+import xss from "xss";
 
 const loginAttempts = {};
 const ATTEMPT_LIMIT = 3;
@@ -76,9 +77,11 @@ const handleLogin = async (req, res, next) => {
 
 const handleRegister = async (req, res) => {
   try {
-    const { usernameInput, emailInput, passwordInput } = req.body;
+    let { usernameInput, emailInput, passwordInput } = req.body;
 
-    console.log(usernameInput);
+    usernameInput = xss(usernameInput);
+    emailInput = xss(emailInput);
+    passwordInput = xss(passwordInput);
 
     if (!usernameInput || !emailInput || !passwordInput) {
       return res

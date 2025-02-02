@@ -4,14 +4,18 @@ import { handleLogin, handleRegister } from "../middlewares/authController.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import xss from "xss";
-
+import csurf from "csurf";
 const router = Router();
 
+const csrfProtection = csurf({ cookie: true });
+// CSRF TOKEN ROUTE
+router.get("/get-csrf-token", csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 // REGISTER ROUTE
-
-router.post("/register", handleRegister);
+router.post("/register", csrfProtection, handleRegister);
 // LOGIN ROUTE
-router.post("/api/login", handleLogin);
+router.post("/api/login", csrfProtection, handleLogin);
 
 router.get("/loginPage", (req, res) => {
   res.sendFile("login.html", { root: "./docs" });
@@ -95,8 +99,9 @@ router.post("/api/posts", authenticateUser, async (req, res) => {
 router.get("/api/posts", authenticateUser, async (req, res) => {
   try {
     const posts = await Post.find({})
-      .populate("userId", "username role") // Populate user info
-      .populate("comments.userId", "username"); // Populate comment authors
+      .populate("userId", "username role")
+      .populate("comments.userId", "username")
+      .populate("likes", "username"); // Populate likes with usernames
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -231,10 +236,41 @@ router.post("/api/posts/:id/like", authenticateUser, async (req, res) => {
 
     await post.save();
 
-    res.status(200).json({ likesCount: post.likes.length });
+    const likedUsers = await User.find(
+      { _id: { $in: post.likes } },
+      "username"
+    );
+
+    res.status(200).json({
+      likes: likedUsers.map((user) => ({
+        id: user._id,
+        username: user.username,
+      })), // Send list of users who liked
+    });
   } catch (error) {
     console.error("Error toggling like:", error);
     res.status(500).json({ message: "Failed to toggle like" });
+  }
+});
+
+router.get("/api/stats", authenticateUser, async (req, res) => {
+  try {
+    const postCount = await Post.countDocuments();
+    const allPosts = await Post.find({}, "likes comments");
+
+    const likeCount = allPosts.reduce(
+      (sum, post) => sum + post.likes.length,
+      0
+    );
+    const commentCount = allPosts.reduce(
+      (sum, post) => sum + post.comments.length,
+      0
+    );
+
+    res.status(200).json({ postCount, likeCount, commentCount });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ message: "Failed to fetch stats" });
   }
 });
 export default router;

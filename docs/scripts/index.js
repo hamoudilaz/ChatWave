@@ -5,8 +5,12 @@ async function getProfile() {
 document.getElementById("profileBtn").addEventListener("click", getProfile);
 
 document.getElementById("createPostBtn").addEventListener("click", async () => {
-  const postTitle = document.getElementById("postTitle").value.trim();
-  const postContent = document.getElementById("postContent").value.trim();
+  const postTitle = DOMPurify.sanitize(
+    document.getElementById("postTitle").value.trim()
+  );
+  const postContent = DOMPurify.sanitize(
+    document.getElementById("postContent").value.trim()
+  );
 
   if (!postTitle || !postContent) {
     alert("Title and content cannot be empty!");
@@ -23,9 +27,10 @@ document.getElementById("createPostBtn").addEventListener("click", async () => {
 
     if (response.ok) {
       alert("Post created successfully!");
-      document.getElementById("postTitle").value = ""; // Clear title input
-      document.getElementById("postContent").value = ""; // Clear content input
-      loadPosts(); // Reload posts
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+      localStorage.removeItem("cachedPosts");
+      loadPosts();
     } else {
       const errorData = await response.json();
       alert(errorData.message || "Failed to create post");
@@ -35,7 +40,6 @@ document.getElementById("createPostBtn").addEventListener("click", async () => {
     alert("An error occurred while creating the post.");
   }
 });
-
 async function fetchPosts() {
   try {
     const response = await fetch("/api/posts", {
@@ -57,7 +61,8 @@ function createPostElement(post) {
   const displayName =
     post.userId?.role === "admin"
       ? "Admin"
-      : post.userId?.username || "Anonymous";
+      : DOMPurify.sanitize(post.userId?.username || "Anonymous");
+
   const postDate = new Date(post.createdAt).toLocaleString();
 
   const postElement = document.createElement("div");
@@ -74,7 +79,16 @@ function createPostElement(post) {
 </div>
 <h3 id="post-title">${post.title}</h3> 
 <p class="post-content" id="content-${post._id}">${post.content}</p>
-<div class="likes">Likes: <span>${post.likes.length || 0}</span></div>
+<div class="likes">
+  <p>Likes: <span>${post.likes.length || 0}</span></p>
+  <div class="liked-users">
+    ${
+      post.likes.length > 0
+        ? post.likes.map((user) => `<span>${user.username}</span>`).join(", ")
+        : "<small>No likes yet</small>"
+    }
+  </div>
+</div>
 <div class="comments-section" id="comments-${post._id}">
   <h4>Comments:</h4>
   <ul class="comments-list" id="comments-list-${post._id}">
@@ -94,43 +108,63 @@ function createPostElement(post) {
 
 function createCommentElement(comment) {
   const commentDate = new Date(comment.createdAt).toLocaleString();
-  return `<li><strong>${comment.userId?.username || "Anonymous"}:</strong> ${
+  return `<li><strong>${DOMPurify.sanitize(
+    comment.userId?.username || "Anonymous"
+  )}:</strong> ${DOMPurify.sanitize(
     comment.content
-  } <small>(${commentDate})</small></li>`;
+  )} <small>(${commentDate})</small></li>`;
 }
 
 function addPostButtons(post, postElement) {
   const buttonContainer = postElement.querySelector(".button-container");
 
-  // Like Button
-  const likeButton = document.createElement("button");
-  likeButton.className = "like-btn transparent-btn";
-  likeButton.id = `like-btn-${post._id}`;
-  likeButton.innerHTML = `<i class="fas fa-thumbs-up"></i> <span>${
-    post.likes.length || 0
-  }</span>`;
-  likeButton.addEventListener("click", () => toggleLike(post._id, likeButton));
-  buttonContainer.appendChild(likeButton);
+  // **Ensure Like Button is NOT recreated multiple times**
+  let likeButton = buttonContainer.querySelector(`#like-btn-${post._id}`);
+  if (!likeButton) {
+    likeButton = document.createElement("button");
+    likeButton.className = "like-btn transparent-btn";
+    likeButton.id = `like-btn-${post._id}`;
+    likeButton.innerHTML = `<i class="fas fa-thumbs-up"></i> <span>${
+      post.likes.length || 0
+    }</span>`;
 
-  // Existing buttons (Edit, Delete)
+    // **Attach event listener ONLY ONCE**
+    likeButton.addEventListener("click", () =>
+      toggleLike(post._id, likeButton)
+    );
+
+    buttonContainer.appendChild(likeButton);
+  } else {
+    // **Only update the like count, do not add a new button**
+    likeButton.querySelector("span").textContent = post.likes.length || 0;
+  }
+
   if (currentUser.role === "admin" || post.userId?._id === currentUser.id) {
-    const editButton = document.createElement("button");
-    editButton.className = "edit-btn transparent-btn";
-    editButton.id = `edit-btn-${post._id}`;
-    editButton.innerHTML = `<i class="fas fa-pencil-alt"></i>`;
-    editButton.addEventListener("click", () => editPost(post));
-    buttonContainer.appendChild(editButton);
+    let editButton = buttonContainer.querySelector(`#edit-btn-${post._id}`);
+    if (!editButton) {
+      editButton = document.createElement("button");
+      editButton.className = "edit-btn transparent-btn";
+      editButton.id = `edit-btn-${post._id}`;
+      editButton.innerHTML = `<i class="fas fa-pencil-alt"></i>`;
+      editButton.addEventListener("click", () => editPost(post));
+      buttonContainer.appendChild(editButton);
+    }
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "delete-btn transparent-btn";
-    deleteButton.innerHTML = `<i class="fas fa-trash"></i>`;
-    deleteButton.addEventListener("click", () => deletePost(post._id));
-    buttonContainer.appendChild(deleteButton);
+    let deleteButton = buttonContainer.querySelector(`#delete-btn-${post._id}`);
+    if (!deleteButton) {
+      deleteButton = document.createElement("button");
+      deleteButton.className = "delete-btn transparent-btn";
+      deleteButton.id = `delete-btn-${post._id}`;
+      deleteButton.innerHTML = `<i class="fas fa-trash"></i>`;
+      deleteButton.addEventListener("click", () => deletePost(post._id));
+      buttonContainer.appendChild(deleteButton);
+    }
   }
 }
+
 function renderPosts(posts) {
   const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = ""; // Clear the container
+  postsContainer.innerHTML = "";
 
   if (posts.length === 0) {
     postsContainer.innerHTML =
@@ -138,7 +172,6 @@ function renderPosts(posts) {
     return;
   }
 
-  // Reverse the order of posts to display the newest first
   posts.reverse().forEach((post) => {
     const postElement = createPostElement(post);
     postsContainer.appendChild(postElement);
@@ -146,20 +179,27 @@ function renderPosts(posts) {
 }
 
 async function loadPosts() {
+  const cachedPosts = localStorage.getItem("cachedPosts");
+
+  if (cachedPosts) {
+    renderPosts(JSON.parse(cachedPosts));
+  }
+
   try {
     const posts = await fetchPosts();
     renderPosts(posts);
+
+    localStorage.setItem("cachedPosts", JSON.stringify(posts));
   } catch (error) {
-    // Error already logged in fetchPosts
+    console.error("Error loading posts:", error);
   }
 }
 
-// Call loadPosts after validateUser completes
 (async function () {
   while (currentUser === null) {
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for validateUser to finish
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  loadPosts(); // Load posts once user is validated
+  loadPosts();
 })();
 
 async function deletePost(postId) {
@@ -170,19 +210,19 @@ async function deletePost(postId) {
   try {
     const response = await fetch(`/api/posts/${postId}`, {
       method: "DELETE",
-      credentials: "include", // Include cookies
+      credentials: "include",
     });
 
     if (response.ok) {
-      alert("Post deleted successfully!");
-      loadPosts(); // Reload posts after deletion
+      localStorage.removeItem("cachedPosts");
+      loadPosts();
     } else {
       const errorData = await response.json();
       alert(errorData.message || "Failed to delete post");
     }
   } catch (error) {
     console.error("Error deleting post:", error);
-    alert("An error occurred while deleting the post");
+    alert("An error occurred while deleting the post.");
   }
 }
 
@@ -246,7 +286,7 @@ function editPost(post) {
 
 async function addComment(postId) {
   const commentInput = document.getElementById(`comment-input-${postId}`);
-  const content = commentInput.value.trim();
+  const content = DOMPurify.sanitize(commentInput.value.trim());
 
   if (!content) {
     alert("Comment content cannot be empty!");
@@ -284,6 +324,17 @@ async function addComment(postId) {
 }
 
 async function toggleLike(postId, likeButton) {
+  const postElement = likeButton.closest(".post");
+  const likesText = postElement.querySelector(".likes p span");
+  const likeButtonCount = likeButton.querySelector("span"); // Like count inside button
+  const likedUsersContainer = postElement.querySelector(".liked-users");
+
+  let isLiking = !likeButton.classList.contains("liked"); // Check if user is liking or unliking
+
+  // **Store old values in case request fails**
+  const oldLikes = parseInt(likesText.textContent, 10) || 0;
+  const oldLikedState = likeButton.classList.contains("liked");
+
   try {
     const response = await fetch(`/api/posts/${postId}/like`, {
       method: "POST",
@@ -292,13 +343,27 @@ async function toggleLike(postId, likeButton) {
 
     if (response.ok) {
       const data = await response.json();
-      const likesCount = likeButton.querySelector("span");
-      likesCount.textContent = data.likesCount; // Update the like count
+      const newLikes = data.likes.length;
+
+      // **Update UI only once after API response**
+      likesText.textContent = newLikes;
+      likeButtonCount.textContent = newLikes;
+      likeButton.classList.toggle("liked", data.likes.includes(currentUser.id));
+
+      likedUsersContainer.innerHTML =
+        newLikes > 0
+          ? data.likes.map((user) => `<span>${user.username}</span>`).join(", ")
+          : "<small>No likes yet</small>";
     } else {
-      alert("Failed to toggle like.");
+      throw new Error("Failed to toggle like.");
     }
   } catch (error) {
     console.error("Error toggling like:", error);
     alert("An error occurred while toggling like.");
+
+    // **Revert UI if request fails**
+    likesText.textContent = oldLikes;
+    likeButtonCount.textContent = oldLikes;
+    likeButton.classList.toggle("liked", oldLikedState);
   }
 }
