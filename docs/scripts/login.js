@@ -85,11 +85,7 @@ document
   .addEventListener("click", login);
 
 document.addEventListener("DOMContentLoaded", function () {
-  document
-    .getElementById("oauthButton")
-    .addEventListener("click", async function () {
-      const csrfToken = await getCsrfToken();
-      console.log(csrfToken);
-      window.location.href = "/login";
-    });
+  document.getElementById("oauthButton").addEventListener("click", function () {
+    window.location.href = "/login";
+  });
 });

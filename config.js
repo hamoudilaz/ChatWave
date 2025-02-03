@@ -18,7 +18,9 @@ const config = {
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    console.log("CORS Request Origin:", origin);
+
+    if (!origin || allowedOrigins.includes(origin) || origin === "null") {
       callback(null, true);
     } else {
       console.error("Blocked by CORS:", origin);
@@ -27,6 +29,7 @@ const corsOptions = {
   },
   credentials: true,
 };
+
 const loginLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
   max: 5, // Max 5 login attempts per IP
