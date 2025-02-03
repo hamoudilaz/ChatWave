@@ -13,9 +13,7 @@ const csrfProtection = csurf({ cookie: true });
 const validateCsrf = (req, res, next) => {
   console.log("CSRF TOKEN:", req.cookies._csrf);
   if (!req.cookies._csrf) {
-    return res
-      .status(403)
-      .json({ message: "CSRF token is invalid or missing" });
+    return res.status(403).json({ message: "CSRF toke is invalid or missing" });
   }
   next();
 };
