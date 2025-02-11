@@ -31,11 +31,12 @@ const corsOptions = {
 };
 
 const loginLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 5, // Max 5 login attempts per IP
+  windowMs: 5 * 60 * 1000,
+  max: 5,
   message: { message: "Too many login attempts. Try again in 5 minutes." },
-  standardHeaders: true, // Include rate limit headers
-  legacyHeaders: false, // Disable old headers
+  keyGenerator: (req) => req.body.usernameInput || req.ip,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const helmetConfig = {
@@ -46,15 +47,15 @@ const helmetConfig = {
         "'self'",
         "https://cdnjs.cloudflare.com",
         "https://cdn.jsdelivr.net",
-        "'unsafe-inline'", // Optional if you use inline scripts
+        "'unsafe-inline'",
       ],
       styleSrc: [
         "'self'",
-        "https://cdnjs.cloudflare.com", // ✅ Allow Cloudflare for styles
-        "https://cdn.jsdelivr.net", // ✅ Allow jsDelivr
-        "'unsafe-inline'", // Needed if inline styles are used
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "'unsafe-inline'",
       ],
-      imgSrc: ["'self'", "data:", "https://your-image-cdn.com"], // Adjust as needed
+      imgSrc: ["'self'", "data:", "https://your-image-cdn.com"],
     },
   },
 };

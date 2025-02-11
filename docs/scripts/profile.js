@@ -40,22 +40,3 @@ async function fetchProfile() {
 }
 
 fetchProfile();
-
-async function logout() {
-  try {
-    const response = await fetch("/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      alert("You have been logged out.");
-      window.location.href = "/login.html";
-    } else {
-      alert("Failed to log out.");
-    }
-  } catch (error) {
-    console.error("Error during logout:", error);
-    alert("An error occurred. Please try again.");
-  }
-}

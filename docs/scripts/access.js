@@ -31,10 +31,8 @@ async function validateUser() {
       if (data.user) {
         const displayName = data.user.name || data.user.username;
         const roleMessage = data.user.role === "admin" ? " (Admin)" : "";
-        welcomeMessage.innerText = `Logged in as: ${displayName}${roleMessage}`;
-
+        welcomeMessage.textContent = `Logged in as: ${displayName}${roleMessage}`;
         currentUser = data.user;
-
         console.log(data.user);
       } else {
         throw new Error("User data missing in response.");
@@ -73,8 +71,8 @@ async function logout() {
     });
 
     if (response.ok) {
-      alert("Logged out successfully.");
-      window.location.href = "/login.html";
+      const data = await response.json();
+      window.location.href = data.redirect; // Redirects to /logout
     } else {
       alert("Failed to log out.");
     }
@@ -82,4 +80,9 @@ async function logout() {
     console.error("Error during logout:", error);
     alert("An error occurred. Please try again.");
   }
+}
+
+document.getElementById("toggleMenu").addEventListener("click", toggleMenu);
+function toggleMenu() {
+  document.querySelector(".nav-list").classList.toggle("active");
 }

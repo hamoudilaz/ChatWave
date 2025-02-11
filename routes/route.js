@@ -13,6 +13,7 @@ const csrfProtection = csurf({ cookie: true });
 const validateCsrf = (req, res, next) => {
   console.log("CSRF TOKEN:", req.cookies._csrf);
   if (!req.cookies._csrf) {
+    console.log("CSRF token missing");
     return res.status(403).json({ message: "CSRF toke is invalid or missing" });
   }
   next();
@@ -38,12 +39,16 @@ router.get("/loginPage", (req, res) => {
 // LOGOUT ROUTE
 router.post("/logout", (req, res) => {
   res
-    .clearCookie("token", { httpOnly: true, sameSite: "strict" }) // Delete JWT
-    .clearCookie("_csrf", { httpOnly: true, sameSite: "strict" }) // Delete CSRF token
+    .clearCookie("token", { httpOnly: true, sameSite: "strict" })
+    .clearCookie("_csrf", { httpOnly: true, sameSite: "strict" })
     .status(200)
-    .json({ message: "Logged out successfully" });
+    .json({ message: "Logged out successfully", redirect: "/logout" });
 });
 
+//Redirects to login page
+router.get("/logout", (req, res) => {
+  res.redirect("/login.html");
+});
 // MAIN PAGE ROUTE
 router.get("/index.html", authenticateUser, (req, res) => {
   res.sendFile("index.html", { root: "./docs" });
@@ -79,7 +84,7 @@ router.get("/protected/profile-data", authenticateUser, async (req, res) => {
   }
 });
 // POST ROUTE
-router.post("/api/posts", authenticateUser, async (req, res) => {
+router.post("/api/posts", validateCsrf, authenticateUser, async (req, res) => {
   try {
     const { title, content } = req.body;
 
@@ -151,40 +156,46 @@ router.delete("/api/posts/:id", authenticateUser, async (req, res) => {
   }
 });
 
-router.put("/api/posts/:id", authenticateUser, async (req, res) => {
-  try {
-    const postId = req.params.id;
-    const { content } = req.body;
-    const userId = req.user.id.toString();
-    const userRole = req.user.role;
+router.put(
+  "/api/posts/:id",
+  validateCsrf,
+  authenticateUser,
+  async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const { content } = req.body;
+      const userId = req.user.id.toString();
+      const userRole = req.user.role;
 
-    if (!content) {
-      return res.status(400).json({ message: "Content cannot be empty" });
+      if (!content) {
+        return res.status(400).json({ message: "Content cannot be empty" });
+      }
+
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      if (userRole !== "admin" && post.userId.toString() !== userId) {
+        return res
+          .status(403)
+          .json({ message: "Unauthorized: You cannot edit this post" });
+      }
+
+      post.content = content;
+      await post.save();
+
+      res.status(200).json({ message: "Post updated successfully", post });
+    } catch (error) {
+      console.error("Error updating post:", error);
+      res.status(500).json({ message: "Failed to update post" });
     }
-
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-
-    if (userRole !== "admin" && post.userId.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized: You cannot edit this post" });
-    }
-
-    post.content = content;
-    await post.save();
-
-    res.status(200).json({ message: "Post updated successfully", post });
-  } catch (error) {
-    console.error("Error updating post:", error);
-    res.status(500).json({ message: "Failed to update post" });
   }
-});
+);
 
 router.post(
   "/api/posts/:postId/comments",
+  validateCsrf,
   authenticateUser,
   async (req, res) => {
     try {

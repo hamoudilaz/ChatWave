@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import xss from "xss";
-import { loginLimiter } from "../config.js"; // Import login limiter
+import { loginLimiter } from "../config.js";
 
 const handleLogin = [
   loginLimiter,
@@ -80,7 +80,7 @@ const handleRegister = async (req, res) => {
       username: usernameInput,
       email: emailInput,
       password: hashedPassword,
-      role: req.body.role || "user",
+      role: "user",
     });
     await newUser.save();
 

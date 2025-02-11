@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+    default-src 'self';
+    script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+    img-src 'self' data:;
+    font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
     <meta charset="UTF-8" />
@@ -29,10 +38,7 @@
     </nav>
     <div class="header">
       <h1>Welcome to ChatWave!</h1>
-      <img
-        class="logo"
-        src="images/DALL_E_2025-01-22_12.41.23_-_A_clean_and_professional_logo_design_for__ChatWave___a_forum_brand._The_logo_features_a_wave_seamlessly_integrated_with_a_speech_bubble__symbolizing_c-removebg-preview.png"
-      />
+      <img class="logo" src="images/logo.png" />
     </div>
     <div class="container">
       <header>
@@ -64,16 +70,7 @@
       </div>
     </div>
 
-    <script src="./scripts/access.js"></script>
+    <script src="scripts/access.js"></script>
     <script src="scripts/index.js"></script>
-
-    <script>
-      document
-        .getElementById("toggleMenu")
-        .addEventListener("click", toggleMenu);
-      function toggleMenu() {
-        document.querySelector(".nav-list").classList.toggle("active");
-      }
-    </script>
   </body>
 </html>

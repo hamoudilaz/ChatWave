@@ -61,48 +61,104 @@ function createPostElement(post) {
   const displayName =
     post.userId?.role === "admin"
       ? "Admin"
-      : DOMPurify.sanitize(post.userId?.username || "Anonymous");
+      : DOMPurify.sanitize(post.userId?.username || "Deleted User");
 
   const postDate = new Date(post.createdAt).toLocaleString();
 
   const postElement = document.createElement("div");
   postElement.className = "post";
 
-  postElement.innerHTML = `
-<div class="post-header"> 
-  
-  <p class="post-timestamp">${postDate}</p>
-  <div class="timeStamp">
-    <div class="button-container"></div>
-  
-  </div>
+  const postHeader = document.createElement("div");
+  postHeader.className = "post-header";
 
-</div>
-    <p class="postAuthor"><strong>${displayName} Posted:</strong></p>
-<h3 id="post-title">${post.title}</h3> 
-<p class="post-content" id="content-${post._id}">${post.content}</p>
-<div class="likes">
-  <p>Likes: <span>${post.likes.length || 0}</span></p>
-  <div class="liked-users">
-    ${
-      post.likes.length > 0
-        ? post.likes.map((user) => `<span>${user.username}</span>`).join(", ")
-        : "<small>No likes yet</small>"
-    }
-  </div>
-</div>
-<div class="comments-section" id="comments-${post._id}">
-  <h4>Comments:</h4>
-  <ul class="comments-list" id="comments-list-${post._id}">
-    ${post.comments.map((comment) => createCommentElement(comment)).join("")}
-  </ul>
-  <textarea id="comment-input-${
-    post._id
-  }" placeholder="Write a comment..."></textarea>
- <button class="add-comment-btn" data-post-id="${post._id}">Add Comment</button>
+  const controls = document.createElement("div");
+  controls.className = "timeStamp";
 
-</div>
-`;
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+
+  const timestamp = document.createElement("p");
+  timestamp.className = "post-timestamp";
+  timestamp.textContent = postDate;
+  controls.appendChild(buttonContainer);
+  postHeader.appendChild(timestamp);
+  postHeader.appendChild(controls);
+  postElement.appendChild(postHeader);
+
+  // Author
+  const author = document.createElement("p");
+  author.className = "postAuthor";
+  const strongElement = document.createElement("strong");
+  strongElement.textContent = `${displayName} Posted:`;
+  author.appendChild(strongElement);
+  postElement.appendChild(author);
+
+  // Title
+  const title = document.createElement("h3");
+  title.id = "post-title";
+  title.textContent = post.title;
+  postElement.appendChild(title);
+
+  // Content
+  const content = document.createElement("p");
+  content.className = "post-content";
+  content.id = `content-${post._id}`;
+  content.textContent = post.content;
+  postElement.appendChild(content);
+
+  // Likes
+  const likesSection = document.createElement("div");
+  likesSection.className = "likes";
+
+  const likesText = document.createElement("p");
+  likesText.innerHTML = `Likes: <span>${post.likes.length || 0}</span>`;
+  likesSection.appendChild(likesText);
+
+  const likedUsers = document.createElement("div");
+  likedUsers.className = "liked-users";
+  if (post.likes.length > 0) {
+    likedUsers.innerHTML = post.likes
+      .map((user) => `<span>${user.username}</span>`)
+      .join(", ");
+  } else {
+    likedUsers.innerHTML = "<small>No likes yet</small>";
+  }
+  likesSection.appendChild(likedUsers);
+  postElement.appendChild(likesSection);
+
+  // Comments Section
+  const commentsSection = document.createElement("div");
+  commentsSection.className = "comments-section";
+  commentsSection.id = `comments-${post._id}`;
+
+  const commentsTitle = document.createElement("h4");
+  commentsTitle.textContent = "Comments:";
+  commentsSection.appendChild(commentsTitle);
+
+  const commentsList = document.createElement("ul");
+  commentsList.className = "comments-list";
+  commentsList.id = `comments-list-${post._id}`;
+
+  // Add each comment dynamically
+  post.comments.forEach((comment) => {
+    const commentElement = createCommentElement(comment);
+    commentsList.appendChild(commentElement);
+  });
+
+  commentsSection.appendChild(commentsList);
+
+  const commentInput = document.createElement("textarea");
+  commentInput.id = `comment-input-${post._id}`;
+  commentInput.placeholder = "Write a comment...";
+  commentsSection.appendChild(commentInput);
+
+  const addCommentButton = document.createElement("button");
+  addCommentButton.className = "add-comment-btn";
+  addCommentButton.setAttribute("data-post-id", post._id);
+  addCommentButton.textContent = "Add Comment";
+
+  commentsSection.appendChild(addCommentButton);
+  postElement.appendChild(commentsSection);
 
   addPostButtons(post, postElement);
 
@@ -111,11 +167,23 @@ function createPostElement(post) {
 
 function createCommentElement(comment) {
   const commentDate = new Date(comment.createdAt).toLocaleString();
-  return `<li><strong>${DOMPurify.sanitize(
-    comment.userId?.username || "Anonymous"
-  )}:</strong> ${DOMPurify.sanitize(
-    comment.content
-  )} <small>${commentDate}</small></li>`;
+  const commentItem = document.createElement("li");
+
+  const strong = document.createElement("strong");
+  strong.textContent =
+    DOMPurify.sanitize(comment.userId?.username || "Deleted User") + ": ";
+
+  const commentText = document.createElement("span");
+  commentText.textContent = comment.content;
+
+  const small = document.createElement("small");
+  small.textContent = ` (${commentDate})`;
+
+  commentItem.appendChild(strong);
+  commentItem.appendChild(commentText);
+  commentItem.appendChild(small);
+
+  return commentItem;
 }
 
 function addPostButtons(post, postElement) {
@@ -126,10 +194,17 @@ function addPostButtons(post, postElement) {
     likeButton = document.createElement("button");
     likeButton.className = "like-btn transparent-btn";
     likeButton.id = `like-btn-${post._id}`;
-    likeButton.innerHTML = `<i class="fas fa-thumbs-up"></i> <span class="likeCount">${
-      post.likes.length || 0
-    }</span>`;
 
+    const likeIcon = document.createElement("i");
+    likeIcon.className = "fas fa-thumbs-up";
+
+    const likeCount = document.createElement("span");
+    likeCount.className = "likeCount";
+    likeCount.textContent = post.likes.length || 0;
+
+    likeButton.appendChild(likeIcon);
+    likeButton.appendChild(document.createTextNode(" "));
+    likeButton.appendChild(likeCount);
     likeButton.addEventListener("click", () =>
       toggleLike(post._id, likeButton)
     );
@@ -145,7 +220,11 @@ function addPostButtons(post, postElement) {
       editButton = document.createElement("button");
       editButton.className = "edit-btn transparent-btn";
       editButton.id = `edit-btn-${post._id}`;
-      editButton.innerHTML = `<i class="fas fa-pencil-alt"></i>`;
+
+      const editIcon = document.createElement("i");
+      editIcon.className = "fas fa-pencil-alt";
+
+      editButton.appendChild(editIcon);
       editButton.addEventListener("click", () => editPost(post));
       buttonContainer.appendChild(editButton);
     }
@@ -155,7 +234,11 @@ function addPostButtons(post, postElement) {
       deleteButton = document.createElement("button");
       deleteButton.className = "delete-btn transparent-btn";
       deleteButton.id = `delete-btn-${post._id}`;
-      deleteButton.innerHTML = `<i class="fas fa-trash"></i>`;
+
+      const deleteIcon = document.createElement("i");
+      deleteIcon.className = "fas fa-trash"; // FontAwesome class
+
+      deleteButton.appendChild(deleteIcon);
       deleteButton.addEventListener("click", () => deletePost(post._id));
       buttonContainer.appendChild(deleteButton);
     }
@@ -164,11 +247,13 @@ function addPostButtons(post, postElement) {
 
 function renderPosts(posts) {
   const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = "";
+  postsContainer.textContent = "";
 
   if (posts.length === 0) {
-    postsContainer.innerHTML =
-      "<p>No posts available. Create one to get started!</p>";
+    const noPostsMessage = document.createElement("p");
+    noPostsMessage.textContent =
+      "No posts available. Create one to get started!";
+    postsContainer.appendChild(noPostsMessage);
     return;
   }
 
@@ -233,13 +318,32 @@ function editPost(post) {
   const editButton = document.getElementById(`edit-btn-${post._id}`);
 
   const currentContent = postContentElement.textContent;
-  postContentElement.innerHTML = `
-      <input type="text" id="edit-input-${post._id}" value="${currentContent}" class="edit-input">
-      <div style="display: flex;">
-      <button id="save-btn-${post._id}" class="save-btn">Save</button>
-      <button id="cancel-btn-${post._id}" class="cancel-btn">Cancel</button>
-      </div>
-    `;
+  postContentElement.textContent = "";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = `edit-input-${post._id}`;
+  input.value = currentContent;
+  input.classList.add("edit-input");
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.display = "flex";
+
+  const saveButton = document.createElement("button");
+  saveButton.id = `save-btn-${post._id}`;
+  saveButton.classList.add("save-btn");
+  saveButton.textContent = "Save";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.id = `cancel-btn-${post._id}`;
+  cancelButton.classList.add("cancel-btn");
+  cancelButton.textContent = "Cancel";
+
+  buttonContainer.appendChild(saveButton);
+  buttonContainer.appendChild(cancelButton);
+
+  postContentElement.appendChild(input);
+  postContentElement.appendChild(buttonContainer);
 
   document
     .getElementById(`save-btn-${post._id}`)
@@ -303,16 +407,17 @@ async function addComment(postId) {
 
     if (response.ok) {
       const { comment } = await response.json();
+
       const commentsList = document.getElementById(`comments-list-${postId}`);
-      console.log(comment);
+      console.log("commentsList", comment);
       const newComment = document.createElement("li");
       const formattedDate = new Date(comment.createdAt).toLocaleString();
       newComment.innerHTML = `<strong>${
-        comment.username || "Anonymous"
+        comment.username || "Deleted User"
       }:</strong> ${comment.content} <small>(${formattedDate})</small>`;
       commentsList.appendChild(newComment);
 
-      commentInput.value = ""; // Clear input field
+      commentInput.value = "";
     } else {
       const errorData = await response.json();
       alert(errorData.message || "Failed to add comment");
@@ -348,10 +453,24 @@ async function toggleLike(postId, likeButton) {
       likeButtonCount.textContent = newLikes;
       likeButton.classList.toggle("liked", data.likes.includes(currentUser.id));
 
-      likedUsersContainer.innerHTML =
-        newLikes > 0
-          ? data.likes.map((user) => `<span>${user.username}</span>`).join(", ")
-          : "<small>No likes yet</small>";
+      likedUsersContainer.textContent = "";
+
+      if (newLikes > 0) {
+        data.likes.forEach((user, index) => {
+          const userSpan = document.createElement("span");
+          userSpan.textContent = user.username;
+
+          likedUsersContainer.appendChild(userSpan);
+
+          if (index < data.likes.length - 1) {
+            likedUsersContainer.appendChild(document.createTextNode(", "));
+          }
+        });
+      } else {
+        const noLikesMessage = document.createElement("small");
+        noLikesMessage.textContent = "No likes yet";
+        likedUsersContainer.appendChild(noLikesMessage);
+      }
     } else {
       throw new Error("Failed to toggle like.");
     }
